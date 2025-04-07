@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: resume-assistant-api
+    env: python
+    buildCommand: cd backend && pip install -r requirements.txt && python -m spacy download en_core_web_sm
+    startCommand: cd backend && gunicorn app:app
+    envVars:
+      - key: PYTHONPATH
+        value: backend
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: resume-assistant-redis
+          property: connectionString
+      - key: UPLOAD_FOLDER
+        value: uploads
+      - key: USE_REDIS
+        value: true
+      - key: MAX_UPLOAD_SIZE
+        value: 16777216  # 16MB in bytes
+      - key: OPENAI_API_KEY
+        sync: false # User will need to set this manually in the Render dashboard
+
+databases:
+  - name: resume-assistant-redis
+    type: redis
+    ipAllowList: []  # Allow only internal connections
